@@ -1,0 +1,8 @@
+{
+  "name": "sharelane-root",
+  "private": true,
+  "scripts": {
+    "install": "cd frontend && npm install",
+    "build": "cd frontend && CI=false npm run build"
+  }
+}
