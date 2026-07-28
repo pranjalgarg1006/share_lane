@@ -10,32 +10,35 @@ export const SocketProvider = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
+    // Only attempt socket connection if a backend API URL is explicitly configured
+    const socketUrl = process.env.REACT_APP_API_URL
+      ? process.env.REACT_APP_API_URL.replace('/api', '')
+      : null;
+
+    // Skip socket connection entirely if no backend URL is configured (production without backend)
+    if (!socketUrl) {
+      return;
+    }
+
     if (isAuthenticated && user) {
       // Only create socket if one doesn't exist
       if (!socket) {
-        // Initialize socket connection
-        const socketUrl = process.env.REACT_APP_API_URL ? 
-          process.env.REACT_APP_API_URL.replace('/api', '') : 
-          'http://localhost:5001';
         const newSocket = io(socketUrl, {
           auth: {
             token: localStorage.getItem('token')
-          }
+          },
+          reconnectionAttempts: 3,
+          timeout: 5000,
         });
 
         // Connection event handlers
         newSocket.on('connect', () => {
           console.log('Socket connected:', newSocket.id);
-          console.log('User ID for socket room:', user._id);
           setIsConnected(true);
-          
-          // Join user to their personal room
           newSocket.emit('join', user._id);
-          console.log('Emitted join event for user:', user._id);
         });
 
         newSocket.on('disconnect', () => {
-          console.log('Socket disconnected');
           setIsConnected(false);
         });
 
@@ -55,6 +58,7 @@ export const SocketProvider = ({ children }) => {
       }
     }
   }, [isAuthenticated, user?._id]); // Only depend on user._id, not the entire user object
+
 
   // Cleanup effect
   useEffect(() => {
