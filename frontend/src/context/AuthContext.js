@@ -11,13 +11,17 @@ export const useAuth = () => {
   
   const loading = !userLoaded || !authLoaded;
   
-  return {
-    user: user ? {
+  const formattedUser = React.useMemo(() => {
+    return user ? {
       _id: user.id,
       name: user.fullName,
       email: user.primaryEmailAddress?.emailAddress,
       role: 'student', // Mock role for now, in a real app this would be synced from Convex
-    } : null,
+    } : null;
+  }, [user]);
+  
+  return {
+    user: formattedUser,
     isAuthenticated: isSignedIn,
     loading,
     logout: () => signOut(),

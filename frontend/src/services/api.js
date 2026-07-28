@@ -33,11 +33,13 @@ export const ridesAPI = {
         pickup: params.pickup,
         destination: params.destination,
         date: new Date(params.date).getTime()
-      }));
+      })).then(res => ({ data: { data: { rides: res.data } } }));
     }
-    return wrap(convexClient.query(convexApi.rides.getActiveRides));
+    return wrap(convexClient.query(convexApi.rides.getActiveRides))
+      .then(res => ({ data: { data: { rides: res.data } } }));
   },
-  getRideById: (id) => wrap(convexClient.query(convexApi.rides.getRideById, { rideId: id })),
+  getRideById: (id) => wrap(convexClient.query(convexApi.rides.getRideById, { rideId: id }))
+      .then(res => ({ data: { data: { ride: res.data } } })),
   createRide: (rideData) => {
     const providerId = localStorage.getItem('token');
     return wrap(convexClient.mutation(convexApi.rides.createRide, {
